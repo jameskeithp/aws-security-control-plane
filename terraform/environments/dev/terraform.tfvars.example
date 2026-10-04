@@ -1,0 +1,23 @@
+# Example variables for the dev environment.
+# Copy to terraform.tfvars and adjust. NEVER commit real account IDs or secrets.
+
+project_name = "aws-security-control-plane"
+environment  = "dev"
+aws_region   = "us-east-1"
+
+# GitHub org/user + repo allowed to assume the deploy role via OIDC.
+github_org  = "jameskeithp"
+github_repo = "aws-security-control-plane"
+
+# "true" = Lambda only reports what it WOULD change (safe default).
+# "false" = Lambda applies remediations to real buckets.
+dry_run = "true"
+
+enable_macie     = true
+enable_inspector = true
+
+tags = {
+  Project   = "aws-security-control-plane"
+  Owner     = "security-engineering"
+  ManagedBy = "terraform"
+}

@@ -1,0 +1,29 @@
+name: Security scan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 6 * * 1"  # weekly, Monday 06:00 UTC
+
+jobs:
+  trivy:
+    name: Trivy v0.36.0 (fs + IaC)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Trivy v0.36.0
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
+            | sh -s -- -b /usr/local/bin v0.36.0
+          trivy --version
+
+      - name: Filesystem vulnerability scan
+        run: trivy fs --severity HIGH,CRITICAL --exit-code 1 --no-progress .
+
+      - name: IaC misconfiguration scan
+        run: trivy config --severity HIGH,CRITICAL --exit-code 1 --no-progress terraform/
