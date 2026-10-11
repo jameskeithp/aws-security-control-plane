@@ -1,11 +1,30 @@
 # AWS Security Control Plane
 
+[![Build](https://github.com/jameskeithp/aws-security-control-plane/actions/workflows/terraform.yml/badge.svg)](https://github.com/jameskeithp/aws-security-control-plane/actions/workflows/terraform.yml)
+[![Tests](https://github.com/jameskeithp/aws-security-control-plane/actions/workflows/tests.yml/badge.svg)](https://github.com/jameskeithp/aws-security-control-plane/actions/workflows/tests.yml)
+[![Security Scan](https://github.com/jameskeithp/aws-security-control-plane/actions/workflows/security.yml/badge.svg)](https://github.com/jameskeithp/aws-security-control-plane/actions/workflows/security.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Terraform](https://img.shields.io/badge/Terraform-%3E%3D1.6-623CE4?logo=terraform&logoColor=white)](terraform/)
+
 A production-style AWS security baseline: hardened S3 foundations, centralized
 logging (CloudTrail), configuration compliance (AWS Config), detective
 services (GuardDuty, Security Hub, Macie, Inspector), and an **automated
 remediation engine** that fixes risky S3 buckets the moment Security Hub
 flags them — deployed entirely with Terraform and GitHub Actions OIDC
 (no long-lived AWS keys).
+
+```mermaid
+flowchart TB
+    GH["GitHub Actions<br/>(OIDC → IAM role, no long-lived keys)"] -->|terraform apply| AWS["AWS Account · us-east-1<br/>(31 resources via Terraform)"]
+    CT["CloudTrail<br/>(multi-region, log-file validation)"] --> LOGS[("S3 Logs Bucket<br/>(hardened, versioned)")]
+    CFG["AWS Config<br/>(recorder + managed rules)"] --> SH["Security Hub<br/>(CSPM aggregation)"]
+    GD["GuardDuty"] --> SH
+    MAC["Macie"] --> SH
+    INS["Inspector2"] --> SH
+    SH -->|Security Hub findings| EB["EventBridge rule"]
+    EB --> LAM["Lambda remediation engine<br/>(dry-run by default)"]
+    LAM -->|apply guardrails| BKT["S3 buckets"]
+```
 
 ```
                     ┌─────────────────────────────┐
